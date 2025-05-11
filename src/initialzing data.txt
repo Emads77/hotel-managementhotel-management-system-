@@ -1,0 +1,17 @@
+private static final Object[][] ROOM_DATA = {
+    {"H1", false}, {"H2", false}, {"H3", false},
+    {"H4", true},  {"H5", true},
+    {"C1", 50}, {"C2", 100}, {"C3", 150}
+};
+
+private void initializeRooms() {
+    for (int i = 0; i < ROOM_DATA.length; i++) {
+        if (i < 5) {  // first 5 are hotel rooms
+            roomsDefinition[i] =
+                new HotelRoom((String) ROOM_DATA[i][0], (Boolean) ROOM_DATA[i][1]);
+        } else {      // remaining are conference rooms
+            roomsDefinition[i] =
+                new ConferenceRoom((String) ROOM_DATA[i][0], (Integer) ROOM_DATA[i][1]);
+        }
+    }
+}

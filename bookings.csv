@@ -1,0 +1,135 @@
+# RoomType, Client, weekNr, duration, minCapacity (for conf_room)
+hotelroom,Velma Doe,35,5
+hotelroom,Saxion,36,5
+hotelroom,Saxion,23,5
+hotelroom,Saxion,23,5
+hotelroom,Saxion,23,5
+hotelroom,Saxion,23,5
+hotelroom,Saxion,23,5
+conference,Saxion,23,5,51
+hotelroom,Marina de Groot,35,5
+hotelroom,Thales,8,4
+conference,BBC,22,5,134
+hotelroom,Velma Doe,46,5
+hotelroom,BBC,14,5
+conference,Thales,27,5,25
+hotelroom,Velma Doe,37,5
+hotelroom,BBC,41,5
+hotelroom,Thales,10,4
+hotelroom,Thales,10,4
+hotelroom,Thales,10,4
+hotelroom,Thales,10,4
+conference,Thales,10,4,35
+hotelroom,Frederik de Groot,41,5
+hotelroom,BBC,30,5
+hotelroom,BBC,5,5
+hotelroom,BBC,5,5
+hotelroom,BBC,5,5
+hotelroom,BBC,5,5
+conference,BBC,5,5,62
+hotelroom,Velma Doe,30,5
+hotelroom,BBC,28,5
+hotelroom,Thales,46,5
+hotelroom,Thales,46,5
+hotelroom,Thales,46,5
+hotelroom,Thales,46,5
+conference,Thales,46,5,34
+hotelroom,Velma Jansen,15,3
+hotelroom,BBC,32,5
+conference,Saxion,21,5,37
+hotelroom,Velma Doe,36,3
+hotelroom,Thales,18,2
+conference,Saxion,6,5,131
+hotelroom,Marina de Groot,17,1
+hotelroom,Saxion,18,2
+hotelroom,BBC,31,4
+conference,BBC,31,4,35
+hotelroom,Velma Jansen,19,1
+hotelroom,BBC,41,5
+hotelroom,Thales,14,4
+hotelroom,Thales,14,4
+conference,Thales,14,4,133
+hotelroom,Frederik de Groot,28,3
+conference,Saxion,31,5,105
+hotelroom,Velma Jansen,19,1
+conference,BBC,16,5,91
+hotelroom,Velma Jansen,44,1
+hotelroom,Saxion,18,5
+conference,BBC,5,4,32
+hotelroom,Velma Jansen,43,3
+conference,Saxion,42,4,25
+hotelroom,Velma Doe,39,3
+conference,Saxion,48,3,140
+hotelroom,Frederik de Groot,21,2
+hotelroom,BBC,16,1
+hotelroom,BBC,21,2
+hotelroom,BBC,21,2
+hotelroom,BBC,21,2
+conference,BBC,21,2,65
+hotelroom,Velma Jansen,14,1
+hotelroom,Thales,42,2
+conference,Thales,32,5,45
+hotelroom,Thales,6,2
+conference,Thales,35,3,54
+conference,Thales,10,4,48
+hotelroom,Marina de Groot,29,2
+hotelroom,Saxion,15,1
+conference,BBC,19,2,98
+hotelroom,Frederik de Groot,45,1
+hotelroom,BBC,51,1
+conference,BBC,42,5,149
+conference,Saxion,27,3,61
+hotelroom,Frederik de Groot,35,1
+conference,Saxion,42,4,46
+hotelroom,BBC,40,1
+conference,BBC,41,1,114
+conference,Thales,11,3,64
+hotelroom,Marina de Groot,42,1
+hotelroom,Thales,35,1
+hotelroom,BBC,28,2
+hotelroom,BBC,28,2
+conference,BBC,28,2,41
+conference,Saxion,37,1,29
+hotelroom,Saxion,33,1
+hotelroom,Velma Jansen,34,1
+conference,Saxion,37,4,43
+conference,BBC,48,4,82
+hotelroom,BBC,5,1
+hotelroom,Saxion,18,1
+hotelroom,BBC,14,1
+conference,BBC,14,1,46
+hotelroom,Velma Jansen,51,1
+hotelroom,Thales,51,1
+conference,Saxion,14,2,62
+hotelroom,Anna Pothoven,12,1
+conference,Saxion,38,1,34
+conference,Thales,46,1,64
+hotelroom,Saxion,28,1
+hotelroom,Saxion,13,1
+conference,Thales,21,1,137
+conference,BBC,36,1,105
+conference,Thales,9,1,35
+hotelroom,Marina de Groot,20,1
+conference,BBC,5,1,91
+conference,Saxion,47,1,117
+conference,Saxion,38,2,96
+hotelroom,Thales,40,1
+conference,BBC,26,1,44
+hotelroom,Marina de Groot,31,1
+conference,Thales,30,1,126
+conference,Thales,40,1,66
+hotelroom,Thales,51,1
+hotelroom,Thales,51,1
+conference,Thales,51,1,60
+conference,BBC,18,2,41
+hotelroom,Velma Jansen,20,1
+hotelroom,Anna Pothoven,20,1
+conference,BBC,18,1,124
+conference,Saxion,47,1,79
+conference,Saxion,30,1,37
+conference,Thales,14,5,146
+hotelroom,Thales,18,4
+hotelroom,Thales,15,1
+hotelroom,Thales,30,1
+hotelroom,Thales,41,4
+hotelroom,Thales,37,5

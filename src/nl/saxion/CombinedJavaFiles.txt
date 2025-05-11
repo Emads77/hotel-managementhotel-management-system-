@@ -1,0 +1,675 @@
+package nl.saxion.oop;
+
+
+
+
+import nl.saxion.oop.model.HotelManager;
+import nl.saxion.oop.model.exception.HotelManagerException;
+
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Application {
+
+    private static final String[] MENU_OPTIONS = {
+            "Book a hotel room for a client",                   // 1
+            "Book a conference room for a client",              // 2
+            "Show available rooms for a specific week",         // 3
+            "Show room availability for the year",              // 4
+            "Load bookings from CSV",                           // 5
+            "Show invoice for client",                          // 6
+    };
+
+    public static void main(String[] args) throws FileNotFoundException, HotelManagerException {
+        HotelManager hotelManager = new HotelManager();
+
+
+
+        int menuSelection;
+
+        do {
+            printMenu();
+
+            System.out.print("Please select a menu option: ");
+            menuSelection = readInt();
+            System.out.println();
+
+            switch (menuSelection) {
+                case 1 -> {
+                    System.out.print("Please enter the client's name: ");
+                    String clientName = readString();
+
+                    System.out.print("Please enter week nr: ");
+                    int startWeek = readInt();
+
+                    System.out.print("Please enter the duration of the booking: ");
+                    int duration = readInt();
+                    try {
+                        hotelManager.bookHotelRoom(clientName, startWeek, duration);
+                    }catch (HotelManagerException e){
+                       System.err.println("error: " + e);
+                    }
+                }
+                case 2 -> {
+                    System.out.print("Please enter the client's name: ");
+                    String clientName = readString();
+
+                    System.out.print("Please enter the minimum capacity for the conference room: ");
+                    int minCapacity = readInt();
+
+                    System.out.print("Please enter week nr: ");
+                    int startWeek = readInt();
+
+                    System.out.print("Please enter the duration of the booking: ");
+                    int duration = readInt();
+
+                    try {
+                        hotelManager.bookConferenceRoom(clientName, minCapacity, startWeek, duration);
+                    }catch (IllegalArgumentException e){
+                        System.out.println("error " + e);
+                    } catch (HotelManagerException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                case 3 -> {
+                    System.out.print("Please enter a week to check availability for: ");
+                    int weekNr = readInt();
+
+                    hotelManager.showAvailableRoomPerWeek(weekNr);
+                }
+                case 4 -> {
+                    System.out.print("Please enter a room to show availability: ");
+                    String roomId = readString();
+                    hotelManager.showRoomAvailabilityPerYear(roomId);
+                }
+                case 5 -> {
+                    String fileName = "bookings.csv";
+                    System.out.println(System.getProperty("user.dir"));
+                    hotelManager.readFromFile(fileName);
+                    System.out.println("The files have been loaded");
+                }
+                case 6 -> {
+                    System.out.print("Please enter the client's name: ");
+                    String clientName = readString();
+                    hotelManager.showInvoiceForClient(clientName);
+                }
+                case 0 -> {
+                    System.out.println("Goodbye!");
+                }
+                default -> {
+                    System.out.println("Invalid value (out of range), please try again.");
+                }
+            }
+
+            System.out.println();
+
+        }
+        while (menuSelection != 0);
+
+    }
+
+    private static void printMenu() {
+        int maxLength = Arrays.stream(MENU_OPTIONS).mapToInt(String::length).max().getAsInt(); // Determine menu item with the longest name.
+        int repeatStars = maxLength + 7; // Add stars to cover "* X) " (5 chars) at the front AND " *" (2 chars) at the end.
+        String bar = "*".repeat(repeatStars); // Create bar "***..." with desired length.
+
+        System.out.println(bar);
+
+        for (int i = 0; i < MENU_OPTIONS.length; i++) {
+            String option = MENU_OPTIONS[i];
+            System.out.printf("* %d) %-" + maxLength + "s *%n", i + 1, option);
+        }
+
+        System.out.printf("* 0) %-" + maxLength + "s *%n", "Exit");
+
+        System.out.println(bar);
+        System.out.println();
+    }
+
+
+    // Helper methods to do some input reading!
+    private static final Scanner sc = new Scanner(System.in);
+
+    public static String readString() {
+        return sc.nextLine();
+    }
+
+    public static int readInt() {
+        while (true) {
+            try {
+                String input = readString();
+                return Integer.parseInt(input);
+            } catch (NumberFormatException nfe) {
+                System.out.print("Invalid value (unable to parse), please try again: ");
+            }
+        }
+    }
+}
+package nl.saxion.oop.model;
+
+
+
+import nl.saxion.oop.model.clients.Client;
+import nl.saxion.oop.model.rooms.Room;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Booking implements Comparable<Booking> {
+
+    Client client;
+    Room room;
+    private final int startWeekNr;
+    private final int duration;
+
+
+    public Booking(Client client, Room room, int startWeekNr, int duration) {
+        this.client = client;
+        this.room = room;
+        this.startWeekNr = startWeekNr;
+        this.duration = duration;
+    }
+
+    public int getStartWeekNr() {
+        return startWeekNr;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    @Override
+    public String toString() {
+        return "Booking:" + "client:" + client + ",room=" + room + ", startWeekNr=" + startWeekNr + ", duration=" + duration;
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * <p>The implementor must ensure {@link Integer#signum
+     * signum}{@code (x.compareTo(y)) == -signum(y.compareTo(x))} for
+     * all {@code x} and {@code y}.  (This implies that {@code
+     * x.compareTo(y)} must throw an exception if and only if {@code
+     * y.compareTo(x)} throws an exception.)
+     *
+     * <p>The implementor must also ensure that the relation is transitive:
+     * {@code (x.compareTo(y) > 0 && y.compareTo(z) > 0)} implies
+     * {@code x.compareTo(z) > 0}.
+     *
+     * <p>Finally, the implementor must ensure that {@code
+     * x.compareTo(y)==0} implies that {@code signum(x.compareTo(z))
+     * == signum(y.compareTo(z))}, for all {@code z}.
+     *
+     * @param o the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     * @throws NullPointerException if the specified object is null
+     * @throws ClassCastException   if the specified object's type prevents it
+     *                              from being compared to this object.
+     * @apiNote It is strongly recommended, but <i>not</i> strictly required that
+     * {@code (x.compareTo(y)==0) == (x.equals(y))}.  Generally speaking, any
+     * class that implements the {@code Comparable} interface and violates
+     * this condition should clearly indicate this fact.  The recommended
+     * language is "Note: this class has a natural ordering that is
+     * inconsistent with equals."
+     */
+    @Override
+    public int compareTo(Booking o) {
+        if(this.startWeekNr != o.startWeekNr){
+            return this.startWeekNr-o.startWeekNr;
+        }
+        return this.duration - o.duration;
+    }
+}
+package nl.saxion.oop.model;
+
+
+import nl.saxion.oop.model.clients.Client;
+import nl.saxion.oop.model.clients.Company;
+import nl.saxion.oop.model.clients.Person;
+import nl.saxion.oop.model.exception.HotelManagerException;
+import nl.saxion.oop.model.rooms.ConferenceRoom;
+import nl.saxion.oop.model.rooms.HotelRoom;
+import nl.saxion.oop.model.rooms.Room;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class HotelManager {
+
+    Room[] roomsDefinition = new Room[8];
+    boolean[][] bookingStatus = new boolean[8][52];
+    Client[] clients = new Client[8];//8 clients, 5 of them are persons, rest are companies
+    ArrayList<Booking> bookings;
+    private static final int NUM_HOTEL_ROOMS = 5;
+
+    public HotelManager() {
+        initializeClients();
+        initializeRooms();
+        bookings = new ArrayList<>();
+    }
+
+    public void bookHotelRoom(String clientName, int startWeek, int duration) throws HotelManagerException {
+        validateInputs(startWeek);
+        Client client = findClient(clientName);
+        Room bookedRoom = findAvailableRoom(startWeek, duration);
+        if (bookedRoom != null) {
+            bookRoom(client, bookedRoom, startWeek, duration);
+            System.out.printf("Room %s was booked successfully for the client %s \n ", bookedRoom.toString(), clientName);
+        } else {
+            throw new HotelManagerException("No available room found for the given period.");
+        }
+    }
+
+
+    //Book a conference room for a client
+    public void bookConferenceRoom(String companyName, int capacity, int startWeek, int duration) throws HotelManagerException {
+        validateInputs(startWeek);
+
+        Client company = findClient(companyName); // helper method to return the real client object
+        validateCompany(company);
+
+        Room bookedConference = findAvailableConferenceRoom(capacity, startWeek, duration);
+        if (bookedConference != null) {
+            bookRoom(company, bookedConference, startWeek, duration);
+            System.out.println("A conference room " + bookedConference.getRoomId() + " has been booked for " + company);
+        } else {
+            throw new HotelManagerException("No conference room was found for week " + startWeek + " and duration " + duration + " for client " + companyName);
+        }
+    }
+
+    private void validateCompany(Client company) throws HotelManagerException {
+        if (company == null) {
+            throw new HotelManagerException("No such company exists");
+        }
+        if (!(company instanceof Company)) {
+            throw new HotelManagerException("Only companies can book conference rooms");
+        }
+    }
+
+
+    private Room findAvailableConferenceRoom(int capacity, int startWeek, int duration) {
+        for (Room room : roomsDefinition) {
+            if (room instanceof ConferenceRoom && ((ConferenceRoom) room).getCapacity() >= capacity && isRoomAvailable(room.getRoomNum(), startWeek, duration)) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    //    Show available rooms for a specific week
+    public void showAvailableRoomPerWeek(int weekNr) throws HotelManagerException {
+        // Validate week number
+        validateInputs(weekNr);
+        // Collect available room IDs in a list
+        ArrayList<String> availableRooms = new ArrayList<>();
+        for (int room = 0; room < 8; room++) {
+            if (!bookingStatus[room][weekNr - 1]) {
+                availableRooms.add(roomsDefinition[room].getRoomId());
+            }
+        }
+
+        // Print the formatted result
+        System.out.println("Available rooms for week " + weekNr + " are: " + availableRooms);
+    }
+
+
+//* 4) Show room availability for the year
+
+    public void showRoomAvailabilityPerYear(String roomId) {
+        boolean roomFound = false;
+        ArrayList<Integer> availableWeeks = new ArrayList<>();
+        // Find the room and collect available weeks
+        for (int room = 0; room < 8; room++) {
+            if (roomsDefinition[room].getRoomId().equals(roomId)) {
+                roomFound = true;
+                // Collect all available weeks
+                for (int week = 0; week < 52; week++) {
+                    if (!bookingStatus[room][week]) {
+                        availableWeeks.add(week + 1); // +1 because week numbers start at 1
+                    }
+                }
+                break; // Exit the loop once we found the room
+            }
+        }
+        // Print room details
+        System.out.println("Room: " + roomId);
+
+        // Print availability
+        if (roomFound) {
+            System.out.println("Available weeks: " + availableWeeks);
+        } else {
+            System.out.println("Room not found. Available weeks: []");
+        }
+    }
+
+
+    public void printClient() {
+        for (Client client : clients) {
+            System.out.println(client);
+        }
+    }
+
+    public void readFromFile(String path) throws FileNotFoundException, HotelManagerException {
+        printClient();
+        Scanner sc = new Scanner(new File(path));
+        sc.nextLine(); // skip the header
+        while (sc.hasNext()) {
+            try {
+                String[] bookingData = sc.nextLine().split(",");
+                String room = bookingData[0];
+                String client = bookingData[1].split(" ")[0];
+                int weekNr = Integer.parseInt(bookingData[2]);
+                int duration = Integer.parseInt(bookingData[3]);
+                if (room.charAt(0) == 'h') {
+                    bookHotelRoom(client, weekNr, duration);
+                } else if (room.charAt(0) == 'c') {
+                    int capacity = Integer.parseInt(bookingData[4]);
+                    bookConferenceRoom(client, capacity, weekNr, duration);
+                } else {
+                    System.out.println("other rooms are not accepted");
+                }
+
+            } catch (HotelManagerException e) {
+                // Handle the error, but don't exit the method
+                System.err.println("Error: " + e.getMessage());
+            }
+        }
+
+    }
+
+
+    public void showInvoiceForClient(String clientName) throws HotelManagerException {
+        Client client = findClient(clientName);
+        if (client == null) {
+            throw new HotelManagerException("Client " + clientName + " was not found in the system");
+        }
+        // Filter bookings for this client and put in a list
+        ArrayList<Booking> clientBookings = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.client.equals(client)) {
+                clientBookings.add(booking);
+            }
+        }
+        //sort
+        Collections.sort(clientBookings);
+
+        // Sum the costs in cents
+        int totalCents = 0;
+        for (Booking booking : clientBookings) {
+            totalCents += booking.room.getRatePerWeek() * booking.getDuration();
+        }
+
+        // Calculate tax
+        int taxCents = 0;
+        boolean isTaxed = true;
+
+        if (client instanceof Company && !((Company) client).isTaxable()) {
+            isTaxed = false;
+        } else {
+            taxCents = (totalCents * 21) / 100;
+        }
+
+        int finalTotal = totalCents + taxCents;
+
+        // Print the invoice
+        System.out.println("Invoice for " + client);
+        System.out.println("------------------------------------------------");
+
+        for (Booking booking : clientBookings) {
+            int bookingCost = booking.room.getRatePerWeek() * booking.getDuration();
+            System.out.printf("Room: %s, Start week: %d, Duration: %d weeks, Cost: €%,.2f\n",
+                    booking.room.getRoomId(),
+                    booking.getStartWeekNr(),
+                    booking.getDuration(),
+                    bookingCost / 100.0);
+        }
+
+        System.out.println("------------------------------------------------");
+        System.out.printf("Subtotal: €%,.2f\n", totalCents / 100.0);
+
+        if (isTaxed) {
+            System.out.printf("Total: €%,.2f (including €%,.2f taxes)\n", finalTotal / 100.0, taxCents / 100.0);
+        } else {
+            System.out.printf("Total: €%,.2f (without tax)\n", totalCents / 100.0);
+        }
+    }
+
+    private Client findClient(String clientName) {
+        for (Client client : clients) {
+            if (client.getName().equals(clientName)) {
+                return client;
+            }
+        }
+        return null;
+    }
+
+    private void initializeRooms() {
+
+        roomsDefinition[0] = new HotelRoom("H1", false);
+        roomsDefinition[1] = new HotelRoom("H2", false);
+        roomsDefinition[2] = new HotelRoom("H3", false);
+        roomsDefinition[3] = new HotelRoom("H4", true);
+        roomsDefinition[4] = new HotelRoom("H5", true);
+        roomsDefinition[5] = new ConferenceRoom("C1", 50);
+        roomsDefinition[6] = new ConferenceRoom("C2", 100);
+        roomsDefinition[7] = new ConferenceRoom("C3", 150);
+
+        for (int room = 0; room < 8; room++) {
+            for (int week = 0; week < 52; week++) {
+                bookingStatus[room][week] = false;
+            }
+        }
+    }
+
+    private void initializeClients() {
+        // Use collection initialization for cleaner code
+        clients = new Client[]{
+                new Person("Anna", "Pothoven", "1985-9482-1342"),
+                new Person("Velma", "Jansen", "2570-0309-6794"),
+                new Person("Marina", "de Groot", "9112-6066-0910"),
+                new Person("Velma", "Doe", "7902-7814-9680"),
+                new Person("Frederik", "de Groot", "4989-2625-7287"),
+                new Company("Thales", "3981-8741-0783", true),
+                new Company("BBC", "4938-7986-9237", false),
+                new Company("Saxion", "0877-4283-1642", false)
+        };
+    }
+
+
+    private Room findAvailableRoom(int startWeek, int duration) {
+        for (int room = 0; room < NUM_HOTEL_ROOMS; room++) {
+            if (isRoomAvailable(room, startWeek, duration)) {
+                return roomsDefinition[room];
+            }
+        }
+        return null;
+    }
+
+    private void validateInputs(int startWeek) throws HotelManagerException {
+        if (startWeek < 1 || startWeek > 52) {
+            throw new HotelManagerException("Start week must be between 1 and 52.");
+        }
+    }
+
+    private void bookRoom(Client client, Room room, int startWeek, int duration) {
+        for (int week = startWeek - 1; week < startWeek - 1 + duration; week++) {
+            bookingStatus[room.getRoomNum()][week] = true;
+        }
+        bookings.add(new Booking(client, room, startWeek, duration));
+    }
+
+    private boolean isRoomAvailable(int room, int startWeek, int duration) {
+        //check room availability
+        for (int week = startWeek - 1; week < startWeek - 1 + duration; week++) {// start week 1, duration 2
+            if (bookingStatus[room][week]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+}
+package nl.saxion.oop.model.clients;
+
+public abstract class Client {
+
+
+    private String creditCard;
+
+
+    public abstract String getName();
+
+    public Client(String creditCard) {
+        this.creditCard = creditCard;
+    }
+
+
+
+}
+package nl.saxion.oop.model.clients;
+
+public class Company extends Client {
+    private final String companyName;
+    private final boolean isTaxable;
+
+
+    public Company(String companyName,String creditCard, boolean isTaxable) {
+        super(creditCard);
+        this.companyName = companyName;
+        this.isTaxable = isTaxable;
+    }
+
+    public boolean isTaxable() {
+        return isTaxable;
+    }
+
+    @Override
+    public String getName() {
+        return companyName;
+    }
+
+    @Override
+    public String toString() {
+        return companyName;
+    }
+
+
+}
+package nl.saxion.oop.model.clients;
+
+import java.lang.ref.Cleaner;
+
+public class Person extends Client {
+    private String firstName;
+    private String lastName;
+
+    public Person(String firstName, String lastName, String creditCard) {
+        super(creditCard);
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+
+
+    @Override
+    public String getName() {
+        return firstName;
+    }
+
+
+    @Override
+    public String toString() {
+        return firstName + "[Person]";
+    }
+
+
+}package nl.saxion.oop.model.exception;
+
+public class HotelManagerException extends Exception{
+    /**
+     * Constructs a new exception with the specified detail message.  The
+     * cause is not initialized, and may subsequently be initialized by
+     * a call to {@link #initCause}.
+     *
+     * @param message the detail message. The detail message is saved for
+     *                later retrieval by the {@link #getMessage()} method.
+     */
+    public HotelManagerException(String message) {
+        super(message);
+    }
+}
+package nl.saxion.oop.model.rooms;
+
+public class ConferenceRoom extends Room {
+   private int capacity;
+    public ConferenceRoom(String roomId,int capacity) {
+        super(roomId);
+        this.capacity=capacity;
+    }
+    @Override
+    public int getRatePerWeek() {
+        return capacity * 25;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+}
+package nl.saxion.oop.model.rooms;
+
+public class HotelRoom extends Room {
+
+    private final boolean hasBath;
+
+    public HotelRoom(String roomId, boolean hasBath) {
+        super(roomId);
+        this.hasBath = hasBath;
+    }
+    @Override
+    public int getRatePerWeek() {
+        if (hasBath) {
+            return 12500;
+        } else {
+            return 10000;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + (hasBath ? " with bath" : " without bath");
+    }
+}
+package nl.saxion.oop.model.rooms;
+
+public abstract class Room {
+    private String roomId;
+
+    public Room(String roomId) {
+        this.roomId = roomId;
+    }
+    public abstract int getRatePerWeek();
+
+
+    public String getRoomId() {
+        return roomId;
+    }
+    public int getRoomNum() {
+        String numStr = this.roomId.substring(1);
+        return Integer.parseInt(numStr);
+    }
+
+    @Override
+    public String toString() {
+        return roomId;
+    }
+}

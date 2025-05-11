@@ -1,0 +1,22 @@
+Object-Oriented-Programming-HotelManager.pdf
+.DS_Store
+
+# IntelliJ / IDE files
+*.iml
+/.idea/
+/*.iws
+/*.ipr
+
+/out/
+/build/
+/target/
+/bin/
+
+*.class
+
+# Logs and temp files
+*.log
+*.tmp
+*~
+
+*.docx
